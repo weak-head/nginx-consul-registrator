@@ -1,0 +1,77 @@
+version: '3'
+
+services:
+  consul:
+    image: consul
+    container_name: consul
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    ports:
+      - 8400:8400
+      - 8500:8500
+      - 86:53/udp
+    environment:
+      - SERVICE_NAME=consul
+    hostname: ${HOST_NAME}
+    command: consul agent -ui -server -bootstrap -data-dir=/tmp/consul -client=0.0.0.0
+
+  registrator:
+    image: gliderlabs/registrator
+    container_name: registrator
+    hostname: ${HOST_NAME}
+    environment:
+      - SERVICE_NAME=registrator
+    depends_on:
+      - consul
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+    command: "-ip ${HOST_NAME} consul://${HOST_NAME}:8500"
+
+  nginx:
+    build: ./gateway/
+    image: nginx-gateway
+    container_name: nginx
+    ports:
+      - 80:80
+    environment:
+      - SERVICE_NAME=nginx
+    depends_on:
+      - consul
+      - registrator
+    links:
+      - consul
+
+  web-ui:
+    build: ./web/
+    image: web-ui
+    ports:
+      - 7000
+    environment:
+      - SERVICE_NAME=web-ui
+    depends_on:
+      - registrator
+
+  system:
+    build: ./services/system/
+    image: system-service
+    ports:
+      - 5000
+    environment:
+      - SERVICE_NAME=system-service
+      - GATEWAY_IP=${HOST_NAME}
+    depends_on:
+      - registrator
+
+  recovery:
+    build: ./services/recovery/
+    image: recovery-service
+    ports:
+      - 5000
+    environment:
+      - SERVICE_NAME=recovery-service
+      - GATEWAY_IP=${HOST_NAME}
+    depends_on:
+      - registrator
