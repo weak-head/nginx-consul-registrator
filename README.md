@@ -1,10 +1,13 @@
 # nginx-consul-registrator
 
-# Overview
+This is an example of using [nginx](https://www.nginx.com/), [consul](https://www.consul.io), [consul-template](https://github.com/hashicorp/consul-template), [registrator](https://github.com/gliderlabs/registrator) and [docker-compose](https://docs.docker.com/compose/) as a backbone of the microservices infrastructure.
 
-TBD
+Here we have a very simple UI and the two connected python services:
+* [web-ui](web/index.html)
+* [system-service](services/system/app.py)
+* [recovery-service](services/recovery/app.py)
 
-# Build and Deploy
+And these are the hi-level steps how to deploy and play with it:
 
 ```bash
 # Set hostname IP to the HOST_NAME variable:
