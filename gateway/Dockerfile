@@ -18,16 +18,19 @@ RUN unzip /usr/bin/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip &&
 # Add nginx.service and make it executable
 ADD nginx.service /etc/service/nginx/run
 RUN chmod a+x /etc/service/nginx/run
+RUN sed -i 's/\r//' /etc/service/nginx/run
 
 # Add consul-template.service and make it executable
 ADD consul-template.service /etc/service/consul-template/run
 RUN chmod a+x /etc/service/consul-template/run
+RUN sed -i 's/\r//' /etc/service/consul-template/run
 
 # Remove the default nginx config
 RUN rm -v /etc/nginx/conf.d/*
 
 # Add nginx consul template config
 ADD nginx.conf /etc/consul-templates/nginx.conf
+RUN sed -i 's/\r//' /etc/consul-templates/nginx.conf
 
 # Run nginx and consul-template services
 CMD ["/usr/bin/runsvdir", "/etc/service"]
